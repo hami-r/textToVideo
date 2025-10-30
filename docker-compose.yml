@@ -1,0 +1,44 @@
+version: '3.8'
+
+services:
+  whisper-dev:
+    image: ubuntu:22.04
+    container_name: whisper-dev
+    working_dir: /workspace
+    volumes:
+      - ./input:/workspace/input
+      - ./output:/workspace/output
+      - ./scripts:/workspace/scripts
+      - whisper-models:/workspace/models
+    environment:
+      - DEBIAN_FRONTEND=noninteractive
+    stdin_open: true
+    tty: true
+    command: >
+      /bin/bash -c "
+      apt-get update && 
+      apt-get install -y git build-essential cmake ffmpeg wget && 
+      if [ ! -d /opt/whisper.cpp ]; then
+        git clone https://github.com/ggerganov/whisper.cpp.git /opt/whisper.cpp;
+      fi &&
+      cd /opt/whisper.cpp &&
+      if [ ! -f build/bin/whisper-cli ]; then
+        cmake -B build &&
+        cmake --build build --config Release;
+      fi &&
+      ln -sf /opt/whisper.cpp/build/bin/whisper-cli /usr/local/bin/whisper &&
+      echo '🎉 Whisper.cpp dev environment ready!' &&
+      echo '📁 Folders: /workspace/input, /workspace/output' &&
+      echo '🎤 Whisper: /opt/whisper.cpp/build/bin/whisper-cli' &&
+      echo '🎬 FFmpeg: ffmpeg command available' &&
+      echo '' &&
+      echo 'Download a model first:' &&
+      echo '  bash /opt/whisper.cpp/models/download-ggml-model.sh base.en' &&
+      echo '' &&
+      echo 'Whisper executable: /opt/whisper.cpp/build/bin/whisper-cli' &&
+      tail -f /dev/null
+      "
+
+volumes:
+  whisper-models:
+    driver: local
