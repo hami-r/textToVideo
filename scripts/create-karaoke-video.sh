@@ -13,11 +13,24 @@ fi
 OUTPUT_DIR="output"
 mkdir -p "$OUTPUT_DIR"
 
-JSON_FILE="$OUTPUT_DIR/audio.json"
-ASS_FILE="$OUTPUT_DIR/audio-karaoke.ass"
-VIDEO_FILE="$OUTPUT_DIR/audio-$ASPECT-karaoke.mp4"
+BASENAME=$(basename "$AUDIO_FILE" | sed 's/\.[^.]*$//')
+JSON_FILE="$OUTPUT_DIR/${BASENAME}.json"
+ASS_FILE="$OUTPUT_DIR/${BASENAME}-karaoke.ass"
+VIDEO_FILE="$OUTPUT_DIR/${BASENAME}-${ASPECT}-karaoke.mp4"
+MODEL="${3:-/opt/whisper.cpp/models/ggml-base.en.bin}"
+# -------------------- STEP 0: Transcribe if needed --------------------
+if [ ! -f "$JSON_FILE" ]; then
+  echo "🎙️ Transcribing audio using Whisper..."
+  /opt/whisper.cpp/build/bin/whisper-cli \
+      -m "$MODEL" \
+      -f "$AUDIO_FILE" \
+      -oj -of "$OUTPUT_DIR/$BASENAME"
+  echo "✅ Transcription complete: $JSON_FILE"
+else
+  echo "📄 Found existing transcription: $JSON_FILE"
+fi
 
-# Default: Reels 1080x1920
+# -------------------- STEP 1: Aspect ratio setup --------------------
 case "$ASPECT" in
   reels)
     WIDTH=1080
@@ -39,7 +52,7 @@ esac
 
 BG_COLOR="black"
 
-# -------------------- STEP 1: Generate subtitles --------------------
+# -------------------- STEP 2: Generate subtitles --------------------
 echo "🎵 Generating karaoke ASS subtitles..."
 
 python3 - <<'PYTHON' "$JSON_FILE" "$WIDTH" "$HEIGHT" "$ASS_FILE"
@@ -58,7 +71,6 @@ def time_to_seconds(t):
         print(f"⚠️ Invalid timestamp format: {t}")
         return 0
 
-
 def format_time(seconds):
     """Convert seconds -> ASS timestamp (h:mm:ss.cc)."""
     hours = int(seconds // 3600)
@@ -75,7 +87,8 @@ def generate_karaoke_ass(json_file, width, height, output_ass):
     with open(json_file, 'r') as f:
         data = json.load(f)
 
-    segments = data.get("transcription", [])
+    # Whisper.cpp JSON key can vary, so support both
+    segments = data.get("transcription") or data.get("segments") or []
     if not segments:
         print("❌ No transcription segments found.")
         return False
@@ -102,20 +115,19 @@ Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
 """
 
     for seg in segments:
-        ts = seg.get("timestamps", {})
-        start = ts.get("from")
-        end = ts.get("to")
+        ts = seg.get("timestamps") or {}
+        start = ts.get("from") or seg.get("start")
+        end = ts.get("to") or seg.get("end")
         text = seg.get("text", "").strip()
         if not start or not end or not text:
             continue
 
-        start_s = time_to_seconds(start)
-        end_s = time_to_seconds(end)
+        start_s = time_to_seconds(start) if isinstance(start, str) else float(start)
+        end_s = time_to_seconds(end) if isinstance(end, str) else float(end)
         duration_cs = int((end_s - start_s) * 100)
         start_fmt = format_time(start_s)
         end_fmt = format_time(end_s)
 
-        # Simple karaoke timing (whole line)
         ass += f"Dialogue: 0,{start_fmt},{end_fmt},Highlight,,0,0,0,,{{\\k{duration_cs}}}{text}\n"
 
     with open(output_ass, 'w') as f:
@@ -128,8 +140,7 @@ if not generate_karaoke_ass(json_file, width, height, output_ass):
     sys.exit(1)
 PYTHON
 
-
-# -------------------- STEP 2: Create video --------------------
+# -------------------- STEP 3: Create video --------------------
 echo "🎬 Creating karaoke video..."
 DURATION=$(ffprobe -v error -show_entries format=duration -of csv=p=0 "$AUDIO_FILE")
 DURATION=${DURATION%.*}

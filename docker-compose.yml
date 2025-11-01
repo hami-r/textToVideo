@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   whisper-dev:
     build: .
@@ -9,11 +7,7 @@ services:
       - ./input:/workspace/input
       - ./output:/workspace/output
       - ./scripts:/workspace/scripts
-      - whisper-models:/opt/whisper.cpp/models
+      - ./models:/opt/whisper.cpp/models
     stdin_open: true
     tty: true
     command: tail -f /dev/null
-
-volumes:
-  whisper-models:
-    driver: local
