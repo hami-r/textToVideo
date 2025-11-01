@@ -1,0 +1,41 @@
+[Script Info]
+Title: Karaoke Subtitles
+ScriptType: v4.00+
+WrapStyle: 0
+PlayResX: 1080
+PlayResY: 1920
+ScaledBorderAndShadow: yes
+
+[V4+ Styles]
+Format: Name, Fontname, Fontsize, PrimaryColour, SecondaryColour, OutlineColour, BackColour, Bold, Italic, Underline, StrikeOut, ScaleX, ScaleY, Spacing, Angle, BorderStyle, Outline, Shadow, Alignment, MarginL, MarginR, MarginV, Encoding
+Style: Default,Arial,52,&H00FFFFFF,&H00FFFFFF,&H00000000,&H80000000,-1,0,0,0,100,100,0,0,1,3,2,2,80,80,400,1
+Style: Highlight,Arial,52,&H0000FFFF,&H0000FFFF,&H00000000,&H80000000,-1,0,0,0,100,100,0,0,1,3,2,2,80,80,400,1
+
+[Events]
+Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
+Dialogue: 0,0:00:00.00,0:00:03.16,Highlight,,0,0,0,,{\k316}Did you hear about Google's latest AI announcement?
+Dialogue: 0,0:00:03.16,0:00:04.67,Highlight,,0,0,0,,{\k151}It's pretty incredible.
+Dialogue: 0,0:00:04.67,0:00:06.46,Highlight,,0,0,0,,{\k178}Oh, really? What's new?
+Dialogue: 0,0:00:06.46,0:00:09.06,Highlight,,0,0,0,,{\k260}Another language model or something similar?
+Dialogue: 0,0:00:09.06,0:00:10.25,Highlight,,0,0,0,,{\k119}Even better.
+Dialogue: 0,0:00:10.25,0:00:14.33,Highlight,,0,0,0,,{\k408}They've unveiled a new AI model called Gemini TTS
+Dialogue: 0,0:00:14.33,0:00:17.94,Highlight,,0,0,0,,{\k360}that can generate incredibly realistic human speech.
+Dialogue: 0,0:00:17.94,0:00:20.14,Highlight,,0,0,0,,{\k219}Wow, realistic speech?
+Dialogue: 0,0:00:20.14,0:00:21.89,Highlight,,0,0,0,,{\k175}That's a significant leap.
+Dialogue: 0,0:00:21.89,0:00:23.48,Highlight,,0,0,0,,{\k158}What exactly can it do?
+Dialogue: 0,0:00:23.48,0:00:27.14,Highlight,,0,0,0,,{\k366}Apparently, it can synthesize voices for different speakers
+Dialogue: 0,0:00:27.14,0:00:30.10,Highlight,,0,0,0,,{\k296}and even generate audio in multiple languages.
+Dialogue: 0,0:00:30.10,0:00:33.00,Highlight,,0,0,0,,{\k289}Experts are genuinely impressed by the quality.
+Dialogue: 0,0:00:33.00,0:00:36.70,Highlight,,0,0,0,,{\k370}That sounds amazing for things like audio books or voice assistants,
+Dialogue: 0,0:00:36.70,0:00:39.64,Highlight,,0,0,0,,{\k293}but I can't help but think about potential downsides.
+Dialogue: 0,0:00:39.64,0:00:40.43,Highlight,,0,0,0,,{\k79}You're right.
+Dialogue: 0,0:00:40.43,0:00:43.47,Highlight,,0,0,0,,{\k303}Some experts are raising concerns about misuse.
+Dialogue: 0,0:00:43.47,0:00:47.07,Highlight,,0,0,0,,{\k360}The potential for creating deep fakes or spreading misinformation
+Dialogue: 0,0:00:47.07,0:00:48.67,Highlight,,0,0,0,,{\k160}is definitely a worry.
+Dialogue: 0,0:00:48.67,0:00:50.57,Highlight,,0,0,0,,{\k189}That's exactly what I was thinking.
+Dialogue: 0,0:00:50.57,0:00:54.14,Highlight,,0,0,0,,{\k356}It's always a double-edged sword with these powerful new technologies.
+Dialogue: 0,0:00:54.14,0:00:56.32,Highlight,,0,0,0,,{\k217}The ethical implications are huge.
+Dialogue: 0,0:00:56.32,0:00:57.43,Highlight,,0,0,0,,{\k111}Absolutely.
+Dialogue: 0,0:00:57.43,0:01:00.07,Highlight,,0,0,0,,{\k264}It's part of Google's bigger push in AI,
+Dialogue: 0,0:01:00.07,0:01:01.78,Highlight,,0,0,0,,{\k170}and while the tech is impressive,
+Dialogue: 0,0:01:01.78,0:01:05.18,Highlight,,0,0,0,,{\k340}the conversation around responsible use will be critical.
