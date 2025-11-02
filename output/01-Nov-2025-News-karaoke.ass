@@ -1,0 +1,40 @@
+[Script Info]
+Title: Karaoke Subtitles
+ScriptType: v4.00+
+WrapStyle: 0
+PlayResX: 1080
+PlayResY: 1920
+ScaledBorderAndShadow: yes
+
+[V4+ Styles]
+Format: Name, Fontname, Fontsize, PrimaryColour, SecondaryColour, OutlineColour, BackColour, Bold, Italic, Underline, StrikeOut, ScaleX, ScaleY, Spacing, Angle, BorderStyle, Outline, Shadow, Alignment, MarginL, MarginR, MarginV, Encoding
+Style: Default,Arial,52,&H00FFFFFF,&H00FFFFFF,&H00000000,&H80000000,-1,0,0,0,100,100,0,0,1,3,2,2,80,80,400,1
+Style: Highlight,Arial,52,&H0000FFFF,&H0000FFFF,&H00000000,&H80000000,-1,0,0,0,100,100,0,0,1,3,2,2,80,80,400,1
+
+[Events]
+Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
+Dialogue: 0,0:00:00.00,0:00:04.90,Highlight,,0,0,0,,{\k490}Hey! Did you catch the news headlines for November 1st? Quite a lot happening.
+Dialogue: 0,0:00:04.90,0:00:11.50,Highlight,,0,0,0,,{\k660}Yeah, I saw a few. The Delhi air pollution measures caught my eye. These banned old commercial vehicles, right?
+Dialogue: 0,0:00:11.50,0:00:17.69,Highlight,,0,0,0,,{\k619}That's right. Commercial goods vehicles registered before 2015 can't enter Delhi from today.
+Dialogue: 0,0:00:17.69,0:00:20.39,Highlight,,0,0,0,,{\k269}It's part of the GRAP measures for winter smog.
+Dialogue: 0,0:00:20.39,0:00:25.50,Highlight,,0,0,0,,{\k510}Good to hear they're taking steps. And speaking of India, did you see the update about Kerala?
+Dialogue: 0,0:00:25.50,0:00:31.80,Highlight,,0,0,0,,{\k630}Oh, the extreme poverty-free declaration? That's a huge milestone, isn't it? First state in India.
+Dialogue: 0,0:00:31.80,0:00:37.46,Highlight,,0,0,0,,{\k566}Absolutely. A major achievement in welfare governance. And on a different note, in sports,
+Dialogue: 0,0:00:37.46,0:00:40.79,Highlight,,0,0,0,,{\k333}Jamaima Rodriguez won Best Fielder at the Women's World Cup.
+Dialogue: 0,0:00:40.79,0:00:47.20,Highlight,,0,0,0,,{\k640}Yes, I saw that. Her agile fielding was incredible, and apparently helped India lift the trophy.
+Dialogue: 0,0:00:47.20,0:00:48.70,Highlight,,0,0,0,,{\k150}What a proud moment.
+Dialogue: 0,0:00:48.70,0:00:55.39,Highlight,,0,0,0,,{\k669}Definitely. Switching gears to politics, Azzarit enjoying the Dalangana cabinet seems to be stirring up some debate.
+Dialogue: 0,0:00:55.39,0:01:02.10,Highlight,,0,0,0,,{\k670}It is, especially with the Jubilee Hills Bipolar coming up. Opposition parties are calling it a "peasement politics."
+Dialogue: 0,0:01:02.10,0:01:06.90,Highlight,,0,0,0,,{\k480}And then there's P.M. Modi's remarks about Nehru and the land bridge during Sardar Patel Cheyante.
+Dialogue: 0,0:01:06.90,0:01:08.70,Highlight,,0,0,0,,{\k179}That always sparks discussion.
+Dialogue: 0,0:01:08.70,0:01:12.79,Highlight,,0,0,0,,{\k409}It certainly does, especially with state elections on the horizon.
+Dialogue: 0,0:01:12.79,0:01:20.40,Highlight,,0,0,0,,{\k760}Moving internationally, the Pakistan-Afghanistan peace talks are finally set to begin, which is good news for regional stability.
+Dialogue: 0,0:01:20.40,0:01:26.90,Highlight,,0,0,0,,{\k650}Hopefully they can resolve the border clashes. And did you read about the FBI foiling a Halloween terror attack in Michigan?
+Dialogue: 0,0:01:26.90,0:01:31.90,Highlight,,0,0,0,,{\k500}Yes, swift intelligence action, they said. Very fortunate that was prevented.
+Dialogue: 0,0:01:31.90,0:01:34.79,Highlight,,0,0,0,,{\k289}But then there's the grim news from the Caribbean.
+Dialogue: 0,0:01:34.79,0:01:40.50,Highlight,,0,0,0,,{\k570}You mean Hurricane Melissa? 50 lives lost already, and it's heading for Bermuda. Just awful.
+Dialogue: 0,0:01:40.50,0:01:47.29,Highlight,,0,0,0,,{\k679}It is. And a concerning report about India's Indus Treaty suspension hitting Pakistan's agriculture.
+Dialogue: 0,0:01:47.29,0:01:53.29,Highlight,,0,0,0,,{\k600}Lack of water storage worsening crop loss there. That could have significant humanitarian implications.
+Dialogue: 0,0:01:53.29,0:01:57.79,Highlight,,0,0,0,,{\k450}Also, protests in Tanzania turned violent over election irregularities.
+Dialogue: 0,0:01:57.79,0:02:05.29,Highlight,,0,0,0,,{\k750}A lot of tension globally, it seems. It's a heavy mix of positive achievements and serious challenges in today's headlines.
+Dialogue: 0,0:02:05.29,0:02:08.80,Highlight,,0,0,0,,{\k350}Agreed. Definitely a lot to unpack from this morning's news.

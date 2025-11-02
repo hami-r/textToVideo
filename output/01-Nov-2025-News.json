@@ -1,0 +1,307 @@
+{
+	"systeminfo": "WHISPER : COREML = 0 | OPENVINO = 0 | CPU : NEON = 1 | ARM_FMA = 1 | OPENMP = 1 | REPACK = 1 | ",
+	"model": {
+		"type": "base",
+		"multilingual": false,
+		"vocab": 51864,
+		"audio": {
+			"ctx": 1500,
+			"state": 512,
+			"head": 8,
+			"layer": 6
+		},
+		"text": {
+			"ctx": 448,
+			"state": 512,
+			"head": 8,
+			"layer": 6
+		},
+		"mels": 80,
+		"ftype": 1
+	},
+	"params": {
+		"model": "/opt/whisper.cpp/models/ggml-base.en.bin",
+		"language": "en",
+		"translate": false
+	},
+	"result": {
+		"language": "en"
+	},
+	"transcription": [
+		{
+			"timestamps": {
+				"from": "00:00:00,000",
+				"to": "00:00:04,900"
+			},
+			"offsets": {
+				"from": 0,
+				"to": 4900
+			},
+			"text": " Hey! Did you catch the news headlines for November 1st? Quite a lot happening."
+		},
+		{
+			"timestamps": {
+				"from": "00:00:04,900",
+				"to": "00:00:11,500"
+			},
+			"offsets": {
+				"from": 4900,
+				"to": 11500
+			},
+			"text": " Yeah, I saw a few. The Delhi air pollution measures caught my eye. These banned old commercial vehicles, right?"
+		},
+		{
+			"timestamps": {
+				"from": "00:00:11,500",
+				"to": "00:00:17,700"
+			},
+			"offsets": {
+				"from": 11500,
+				"to": 17700
+			},
+			"text": " That's right. Commercial goods vehicles registered before 2015 can't enter Delhi from today."
+		},
+		{
+			"timestamps": {
+				"from": "00:00:17,700",
+				"to": "00:00:20,400"
+			},
+			"offsets": {
+				"from": 17700,
+				"to": 20400
+			},
+			"text": " It's part of the GRAP measures for winter smog."
+		},
+		{
+			"timestamps": {
+				"from": "00:00:20,400",
+				"to": "00:00:25,500"
+			},
+			"offsets": {
+				"from": 20400,
+				"to": 25500
+			},
+			"text": " Good to hear they're taking steps. And speaking of India, did you see the update about Kerala?"
+		},
+		{
+			"timestamps": {
+				"from": "00:00:25,500",
+				"to": "00:00:31,800"
+			},
+			"offsets": {
+				"from": 25500,
+				"to": 31800
+			},
+			"text": " Oh, the extreme poverty-free declaration? That's a huge milestone, isn't it? First state in India."
+		},
+		{
+			"timestamps": {
+				"from": "00:00:31,800",
+				"to": "00:00:37,460"
+			},
+			"offsets": {
+				"from": 31800,
+				"to": 37460
+			},
+			"text": " Absolutely. A major achievement in welfare governance. And on a different note, in sports,"
+		},
+		{
+			"timestamps": {
+				"from": "00:00:37,460",
+				"to": "00:00:40,800"
+			},
+			"offsets": {
+				"from": 37460,
+				"to": 40800
+			},
+			"text": " Jamaima Rodriguez won Best Fielder at the Women's World Cup."
+		},
+		{
+			"timestamps": {
+				"from": "00:00:40,800",
+				"to": "00:00:47,200"
+			},
+			"offsets": {
+				"from": 40800,
+				"to": 47200
+			},
+			"text": " Yes, I saw that. Her agile fielding was incredible, and apparently helped India lift the trophy."
+		},
+		{
+			"timestamps": {
+				"from": "00:00:47,200",
+				"to": "00:00:48,700"
+			},
+			"offsets": {
+				"from": 47200,
+				"to": 48700
+			},
+			"text": " What a proud moment."
+		},
+		{
+			"timestamps": {
+				"from": "00:00:48,700",
+				"to": "00:00:55,400"
+			},
+			"offsets": {
+				"from": 48700,
+				"to": 55400
+			},
+			"text": " Definitely. Switching gears to politics, Azzarit enjoying the Dalangana cabinet seems to be stirring up some debate."
+		},
+		{
+			"timestamps": {
+				"from": "00:00:55,400",
+				"to": "00:01:02,100"
+			},
+			"offsets": {
+				"from": 55400,
+				"to": 62100
+			},
+			"text": " It is, especially with the Jubilee Hills Bipolar coming up. Opposition parties are calling it a \"peasement politics.\""
+		},
+		{
+			"timestamps": {
+				"from": "00:01:02,100",
+				"to": "00:01:06,900"
+			},
+			"offsets": {
+				"from": 62100,
+				"to": 66900
+			},
+			"text": " And then there's P.M. Modi's remarks about Nehru and the land bridge during Sardar Patel Cheyante."
+		},
+		{
+			"timestamps": {
+				"from": "00:01:06,900",
+				"to": "00:01:08,700"
+			},
+			"offsets": {
+				"from": 66900,
+				"to": 68700
+			},
+			"text": " That always sparks discussion."
+		},
+		{
+			"timestamps": {
+				"from": "00:01:08,700",
+				"to": "00:01:12,800"
+			},
+			"offsets": {
+				"from": 68700,
+				"to": 72800
+			},
+			"text": " It certainly does, especially with state elections on the horizon."
+		},
+		{
+			"timestamps": {
+				"from": "00:01:12,800",
+				"to": "00:01:20,400"
+			},
+			"offsets": {
+				"from": 72800,
+				"to": 80400
+			},
+			"text": " Moving internationally, the Pakistan-Afghanistan peace talks are finally set to begin, which is good news for regional stability."
+		},
+		{
+			"timestamps": {
+				"from": "00:01:20,400",
+				"to": "00:01:26,900"
+			},
+			"offsets": {
+				"from": 80400,
+				"to": 86900
+			},
+			"text": " Hopefully they can resolve the border clashes. And did you read about the FBI foiling a Halloween terror attack in Michigan?"
+		},
+		{
+			"timestamps": {
+				"from": "00:01:26,900",
+				"to": "00:01:31,900"
+			},
+			"offsets": {
+				"from": 86900,
+				"to": 91900
+			},
+			"text": " Yes, swift intelligence action, they said. Very fortunate that was prevented."
+		},
+		{
+			"timestamps": {
+				"from": "00:01:31,900",
+				"to": "00:01:34,800"
+			},
+			"offsets": {
+				"from": 91900,
+				"to": 94800
+			},
+			"text": " But then there's the grim news from the Caribbean."
+		},
+		{
+			"timestamps": {
+				"from": "00:01:34,800",
+				"to": "00:01:40,500"
+			},
+			"offsets": {
+				"from": 94800,
+				"to": 100500
+			},
+			"text": " You mean Hurricane Melissa? 50 lives lost already, and it's heading for Bermuda. Just awful."
+		},
+		{
+			"timestamps": {
+				"from": "00:01:40,500",
+				"to": "00:01:47,300"
+			},
+			"offsets": {
+				"from": 100500,
+				"to": 107300
+			},
+			"text": " It is. And a concerning report about India's Indus Treaty suspension hitting Pakistan's agriculture."
+		},
+		{
+			"timestamps": {
+				"from": "00:01:47,300",
+				"to": "00:01:53,300"
+			},
+			"offsets": {
+				"from": 107300,
+				"to": 113300
+			},
+			"text": " Lack of water storage worsening crop loss there. That could have significant humanitarian implications."
+		},
+		{
+			"timestamps": {
+				"from": "00:01:53,300",
+				"to": "00:01:57,800"
+			},
+			"offsets": {
+				"from": 113300,
+				"to": 117800
+			},
+			"text": " Also, protests in Tanzania turned violent over election irregularities."
+		},
+		{
+			"timestamps": {
+				"from": "00:01:57,800",
+				"to": "00:02:05,300"
+			},
+			"offsets": {
+				"from": 117800,
+				"to": 125300
+			},
+			"text": " A lot of tension globally, it seems. It's a heavy mix of positive achievements and serious challenges in today's headlines."
+		},
+		{
+			"timestamps": {
+				"from": "00:02:05,300",
+				"to": "00:02:08,800"
+			},
+			"offsets": {
+				"from": 125300,
+				"to": 128800
+			},
+			"text": " Agreed. Definitely a lot to unpack from this morning's news."
+		}
+	]
+}
