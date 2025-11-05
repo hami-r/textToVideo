@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Video Creation Library - Modular functions for audio transcription and video generation
-# VERSION 2.0 - Now with Background Image Support!
+# VERSION 3.0 - Combined & Complete with all Image Features
 
 # ==================== CONFIGURATION ====================
 # These can be overridden by setting environment variables before sourcing
@@ -247,68 +247,167 @@ create_background_filter() {
     esac
 }
 
-
-# Create video filter for image overlay
-create_image_filter() {
-    local image_file="$1"
-    local position="${2:-center}"  # center, top-left, top-right, bottom-left, bottom-right, custom
-    local scale="${3:-0.3}"  # 0.1 to 1.0 (percentage of video width)
-    local opacity="${4:-1.0}"  # 0.0 to 1.0
-    local x_offset="${5:-0}"
-    local y_offset="${6:-0}"
-    
-    check_file "$image_file" "Image file" || return 1
+# Create video filter string for an image overlay
+create_overlay_filter_string() {
+    local position="${1:-top-right}"
+    local scale="${2:-0.15}"
+    local opacity="${3:-1.0}"
     
     # Calculate position based on preset
     local x_pos y_pos
     case "$position" in
-        center)
-            x_pos="(W-w)/2"
-            y_pos="(H-h)/2"
-            ;;
-        top-left)
-            x_pos="50"
-            y_pos="50"
-            ;;
-        top-right)
-            x_pos="W-w-50"
-            y_pos="50"
-            ;;
-        bottom-left)
-            x_pos="50"
-            y_pos="H-h-50"
-            ;;
-        bottom-right)
-            x_pos="W-w-50"
-            y_pos="H-h-50"
-            ;;
-        top-center)
-            x_pos="(W-w)/2"
-            y_pos="50"
-            ;;
-        bottom-center)
-            x_pos="(W-w)/2"
-            y_pos="H-h-50"
-            ;;
-        custom)
-            x_pos="$x_offset"
-            y_pos="$y_offset"
-            ;;
-        *)
-            echo "❌ Unknown position: $position" >&2
-            return 1
-            ;;
+        center) x_pos="(W-w)/2"; y_pos="(H-h)/2" ;;
+        top-left) x_pos="50"; y_pos="50" ;;
+        top-right) x_pos="W-w-50"; y_pos="50" ;;
+        bottom-left) x_pos="50"; y_pos="H-h-50" ;;
+        bottom-right) x_pos="W-w-50"; y_pos="H-h-50" ;;
+        top-center) x_pos="(W-w)/2"; y_pos="50" ;;
+        bottom-center) x_pos="(W-w)/2"; y_pos="H-h-50" ;;
+        *) echo "❌ Unknown position: $position" >&2; return 1 ;;
     esac
     
-    # Base overlay filter string
-    local overlay_filter="overlay=${x_pos}:${y_pos}"
-    
-    # Return filter components: scale, opacity, and overlay placement
-    echo "scale=iw*${scale}:-1,format=rgba,colorchannelmixer=aa=${opacity}[overlay_img];[base][overlay_img]${overlay_filter}"
+    # Returns a generic filter chain segment.
+    # Expects input streams to be named [base] for the video and [img] for the overlay.
+    echo "[img]scale=iw*${scale}:-1,format=rgba,colorchannelmixer=aa=${opacity}[overlay];[base][overlay]overlay=${x_pos}:${y_pos}"
 }
 
-# (Other image functions like add_logo_to_video, create_image_zoom, etc. remain the same)
-# ...
+# Add single logo/watermark to existing video
+add_logo_to_video() {
+    local input_video="$1"
+    local image_file="$2"
+    local output_video="$3"
+    local position="${4:-top-right}"
+    local scale="${5:-0.15}"
+    local opacity="${6:-1.0}"
+    
+    check_file "$input_video" "Input video" || return 1
+    check_file "$image_file" "Image file" || return 1
+    
+    echo "🖼️  Adding logo to video..."
+    
+    local filter_str=$(create_overlay_filter_string "$position" "$scale" "$opacity")
+    # Adapt the generic filter string for a simple 2-input command
+    local filter_complex="${filter_str/\[base\]/[0:v]}"
+    filter_complex="${filter_complex/\[img\]/[1:v]}"
+
+    ffmpeg -y -i "$input_video" -i "$image_file" \
+        -filter_complex "$filter_complex" \
+        -c:v libx264 -preset medium -crf 23 \
+        -c:a copy \
+        "$output_video"
+    
+    if [ $? -eq 0 ]; then
+        echo "✅ Logo added: $output_video"; return 0;
+    else
+        echo "❌ Failed to add logo"; return 1;
+    fi
+}
+
+# Resize/prepare image for overlay
+prepare_image() {
+    local input_image="$1"
+    local output_image="$2"
+    local target_size="${3:-300}"  # width or height in pixels
+    local keep_aspect="${4:-yes}"
+    local add_transparency="${5:-no}"
+    local opacity="${6:-1.0}"
+    
+    check_file "$input_image" "Input image" || return 1
+    
+    echo "🎨 Preparing image..."
+    
+    local scale_filter
+    if [ "$keep_aspect" == "yes" ]; then
+        scale_filter="scale=${target_size}:-1"
+    else
+        scale_filter="scale=${target_size}:${target_size}"
+    fi
+    
+    local filter="$scale_filter"
+    
+    if [ "$add_transparency" == "yes" ]; then
+        filter="${filter},format=rgba,colorchannelmixer=aa=${opacity}"
+    fi
+    
+    ffmpeg -y -i "$input_image" -vf "$filter" "$output_image"
+    
+    if [ $? -eq 0 ]; then
+        echo "✅ Image prepared: $output_image"; return 0
+    else
+        echo "❌ Failed to prepare image"; return 1
+    fi
+}
+
+# Create animated zoom effect on image
+create_image_zoom() {
+    local image_file="$1"
+    local output_video="$2"
+    local duration="${3:-5}"
+    local zoom_type="${4:-in}"  # in, out, or pan
+    local width="${5:-1920}"
+    local height="${6:-1080}"
+    local fps="${7:-30}"
+    
+    check_file "$image_file" "Image file" || return 1
+    
+    echo "🎬 Creating zoom effect on image..."
+    
+    local zoom_filter
+    case "$zoom_type" in
+        in) zoom_filter="zoompan=z='min(zoom+0.0015,1.5)':d=${duration}*${fps}:x='iw/2-(iw/zoom/2)':y='ih/2-(ih/zoom/2)':s=${width}x${height}";;
+        out) zoom_filter="zoompan=z='if(lte(zoom,1.0),1.5,max(1.001,zoom-0.0015))':d=${duration}*${fps}:x='iw/2-(iw/zoom/2)':y='ih/2-(ih/zoom/2)':s=${width}x${height}";;
+        pan) zoom_filter="zoompan=z=1.5:d=${duration}*${fps}:x='iw/2-(iw/zoom/2)':y='if(lte(on,1),ih/2-(ih/zoom/2),y-1)':s=${width}x${height}";;
+        *) echo "❌ Unknown zoom type: $zoom_type"; return 1;;
+    esac
+    
+    ffmpeg -y -loop 1 -i "$image_file" \
+        -vf "$zoom_filter,format=yuv420p" \
+        -t "$duration" -r "$fps" \
+        -c:v libx264 -preset medium -crf 23 \
+        "$output_video"
+    
+    if [ $? -eq 0 ]; then
+        echo "✅ Zoom video created: $output_video"; return 0;
+    else
+        echo "❌ Failed to create zoom video"; return 1;
+    fi
+}
+
+# Create picture-in-picture effect
+create_pip_video() {
+    local main_video="$1"
+    local pip_image="$2"
+    local output_video="$3"
+    local position="${4:-bottom-right}"
+    local scale="${5:-0.25}"
+    local opacity="${6:-1.0}"
+    local padding="${7:-20}"  # pixels from edge
+    
+    check_file "$main_video" "Main video" || return 1
+    check_file "$pip_image" "PIP image" || return 1
+    
+    echo "🖼️  Creating picture-in-picture..."
+    
+    local x_pos y_pos
+    case "$position" in
+        top-left) x_pos="$padding"; y_pos="$padding" ;;
+        top-right) x_pos="main_w-overlay_w-$padding"; y_pos="$padding" ;;
+        bottom-left) x_pos="$padding"; y_pos="main_h-overlay_h-$padding" ;;
+        *) x_pos="main_w-overlay_w-$padding"; y_pos="main_h-overlay_h-$padding" ;;
+    esac
+    
+    ffmpeg -y -i "$main_video" -i "$pip_image" \
+        -filter_complex "[1:v]scale=iw*${scale}:ih*${scale},format=rgba,colorchannelmixer=aa=${opacity}[pip];[0:v][pip]overlay=${x_pos}:${y_pos}" \
+        -c:v libx264 -preset medium -crf 23 \
+        -c:a copy \
+        "$output_video"
+    
+    if [ $? -eq 0 ]; then
+        echo "✅ PIP video created: $output_video"; return 0
+    else
+        echo "❌ Failed to create PIP video"; return 1
+    fi
+}
 
 # ==================== VIDEO CREATION FUNCTIONS ====================
 
@@ -323,15 +422,14 @@ create_basic_video() {
     local fontsize="${7:-24}"
     local margin_v="${8:-50}"
     local font="${9:-$DEFAULT_FONT}"
-    local alignment="${10:-2}"  # 2=bottom center
+    local alignment="${10:-2}"
     local outline="${11:-2}"
     local shadow="${12:-0}"
-    local image_file="${13}"      # optional overlay image
+    local image_file="${13}"
     local image_position="${14:-top-right}"
     local image_scale="${15:-0.15}"
-    # --- NEW PARAMETERS ---
-    local bg_image="${16}"         # optional background image
-    local bg_image_mode="${17:-scale}" # scale, cover, contain
+    local bg_image="${16}"
+    local bg_image_mode="${17:-scale}"
 
     check_file "$audio_file" "Audio file" || return 1
     check_file "$srt_file" "SRT file" || return 1
@@ -343,58 +441,40 @@ create_basic_video() {
     
     local ffmpeg_inputs=""
     local filter_complex=""
-    
-    # Determine the video base: background image or solid color
+    local audio_map_idx=1
+    local overlay_map_idx=2
+
     if [ -n "$bg_image" ] && [ -f "$bg_image" ]; then
         echo "🖼️  Using background image: $bg_image (mode: $bg_image_mode)"
         local bg_filter=$(create_background_filter "$bg_image_mode" "$width" "$height")
         ffmpeg_inputs="-loop 1 -i \"$bg_image\" -i \"$audio_file\""
         filter_complex="[0:v]$bg_filter,format=yuv420p[base];"
-        # Audio stream is now at index 1
-        local audio_map="-map 1:a:0"
     else
         echo "🎨 Using background color: $bg_color"
         ffmpeg_inputs="-f lavfi -i color=c=$bg_color:s=${width}x${height}:d=$duration:r=30 -i \"$audio_file\""
         filter_complex="[0:v]format=yuv420p[base];"
-        # Audio stream is now at index 1
-        local audio_map="-map 1:a:0"
     fi
 
-    # Add subtitles
     local abs_srt_file=$(readlink -f "$srt_file" 2>/dev/null || echo "$srt_file")
     local subtitle_style="FontName=${font},FontSize=${fontsize},PrimaryColour=&HFFFFFF,OutlineColour=&H000000,BorderStyle=3,Outline=${outline},Shadow=${shadow},MarginV=${margin_v},Alignment=${alignment}"
     filter_complex="${filter_complex}[base]subtitles='${abs_srt_file}':force_style='${subtitle_style}'[subbed];"
     local current_video_stream="[subbed]"
-    
-    # Add image overlay if provided
+
     if [ -n "$image_file" ] && [ -f "$image_file" ]; then
         echo "🖼️  Adding image overlay: $image_file"
-        # Add the overlay image to the inputs
         ffmpeg_inputs="$ffmpeg_inputs -i \"$image_file\""
-        # The overlay image is now the last input, its stream index is 2
-        local overlay_filter=$(create_image_filter "$image_file" "$image_position" "$image_scale")
-        filter_complex="${filter_complex}[2:v]${overlay_filter/\[base\]/$current_video_stream}"
-        # The final video stream is the output of the overlay filter
-        current_video_stream="[v]" # create_image_filter renames the final stream
-    else
-        # If no overlay, the subtitled stream is the final one
-        filter_complex="${filter_complex%*;} " # Remove trailing semicolon
+        local overlay_filter=$(create_overlay_filter_string "$image_position" "$image_scale" "1.0")
+        filter_complex="${filter_complex}[${overlay_map_idx}:v]${overlay_filter/\[base\]/$current_video_stream}[v];"
+        current_video_stream="[v]"
     fi
     
-    local final_map="-map \"${current_video_stream}\""
+    filter_complex="${filter_complex%;}" # Remove trailing semicolon if it exists
     
-    local ffmpeg_cmd="ffmpeg -y $ffmpeg_inputs -filter_complex \"$filter_complex\" $final_map $audio_map -c:v libx264 -preset medium -crf 23 -c:a aac -b:a 192k -shortest \"$output_file\""
+    local ffmpeg_cmd="ffmpeg -y $ffmpeg_inputs -filter_complex \"$filter_complex\" -map \"${current_video_stream}\" -map ${audio_map_idx}:a -c:v libx264 -preset medium -crf 23 -c:a aac -b:a 192k -shortest \"$output_file\""
     
     eval $ffmpeg_cmd
     
-    if [ $? -eq 0 ]; then
-        echo "✅ Video created: $output_file"
-        echo "$output_file"
-        return 0
-    else
-        echo "❌ Video creation failed" >&2
-        return 1
-    fi
+    if [ $? -eq 0 ]; then echo "✅ Video created: $output_file"; return 0; else echo "❌ Video creation failed"; return 1; fi
 }
 
 # Create karaoke video with ASS subtitles
@@ -409,12 +489,11 @@ create_karaoke_video() {
     local preset="${8:-medium}"
     local crf="${9:-23}"
     local fps="${10:-30}"
-    local image_file="${11}"     # optional overlay image
+    local image_file="${11}"
     local image_position="${12:-top-right}"
     local image_scale="${13:-0.15}"
-    # --- NEW PARAMETERS ---
-    local bg_image="${14}"         # optional background image
-    local bg_image_mode="${15:-scale}" # scale, cover, contain
+    local bg_image="${14}"
+    local bg_image_mode="${15:-scale}"
     
     check_file "$audio_file" "Audio file" || return 1
     check_file "$ass_file" "ASS file" || return 1
@@ -425,6 +504,8 @@ create_karaoke_video() {
     
     local ffmpeg_inputs=""
     local filter_complex=""
+    local audio_map_idx=1
+    local overlay_map_idx=2
 
     if [ -n "$bg_image" ] && [ -f "$bg_image" ]; then
         echo "🖼️  Using background image: $bg_image (mode: $bg_image_mode)"
@@ -444,23 +525,18 @@ create_karaoke_video() {
     if [ -n "$image_file" ] && [ -f "$image_file" ]; then
         echo "🖼️  Adding image overlay: $image_file"
         ffmpeg_inputs="$ffmpeg_inputs -i \"$image_file\""
-        local overlay_filter=$(create_image_filter "$image_file" "$image_position" "$image_scale")
-        filter_complex="${filter_complex}[2:v]${overlay_filter/\[base\]/$current_video_stream}[v];"
+        local overlay_filter=$(create_overlay_filter_string "$image_position" "$image_scale" "1.0")
+        filter_complex="${filter_complex}[${overlay_map_idx}:v]${overlay_filter/\[base\]/$current_video_stream}[v];"
         current_video_stream="[v]"
     fi
-    filter_complex="${filter_complex%*;}"
-    
-    local ffmpeg_cmd="ffmpeg -y $ffmpeg_inputs -filter_complex \"$filter_complex\" -map \"${current_video_stream}\" -map 1:a -c:v libx264 -preset $preset -crf $crf -c:a aac -b:a 192k -shortest \"$output_file\""
+
+    filter_complex="${filter_complex%;}"
+
+    local ffmpeg_cmd="ffmpeg -y $ffmpeg_inputs -filter_complex \"$filter_complex\" -map \"${current_video_stream}\" -map ${audio_map_idx}:a -c:v libx264 -preset $preset -crf $crf -c:a aac -b:a 192k -shortest \"$output_file\""
     
     eval $ffmpeg_cmd
 
-    if [ $? -eq 0 ]; then
-        echo "✅ Karaoke video created: $output_file"
-        return 0
-    else
-        echo "❌ Video creation failed" >&2
-        return 1
-    fi
+    if [ $? -eq 0 ]; then echo "✅ Karaoke video created: $output_file"; return 0; else echo "❌ Video creation failed"; return 1; fi
 }
 
 # Create modern styled video with enhanced subtitles
@@ -471,25 +547,21 @@ create_modern_video() {
     local output_file="$4"
     local bg_color="${5:-#1a1a2e}"
     local font="${6:-Arial Bold}"
-    local primary_color="${7:-&HFFFFFF&}"  # White
-    local highlight_color="${8:-&HFFFF00&}"  # Yellow
+    local primary_color="${7:-&HFFFFFF&}"
+    local highlight_color="${8:-&HFFFF00&}"
     local preset="${9:-medium}"
     local crf="${10:-23}"
-    local image_file="${11}"     # optional overlay image
+    local image_file="${11}"
     local image_position="${12:-top-right}"
     local image_scale="${13:-0.15}"
-    # --- NEW PARAMETERS ---
-    local bg_image="${14}"         # optional background image
-    local bg_image_mode="${15:-scale}" # scale, cover, contain
+    local bg_image="${14}"
+    local bg_image_mode="${15:-scale}"
 
     check_file "$audio_file" "Audio file" || return 1
     check_file "$srt_file" "SRT file" || return 1
     
     local settings=$(get_format_settings "$format")
-    if [ "$settings" == "ERROR" ]; then
-        echo "❌ Unknown format: $format" >&2
-        return 1
-    fi
+    if [ "$settings" == "ERROR" ]; then echo "❌ Unknown format: $format"; return 1; fi
     IFS=':' read -r width height fontsize margin_v _ <<< "$settings"
     
     local duration=$(get_audio_duration "$audio_file")
@@ -498,6 +570,8 @@ create_modern_video() {
     
     local ffmpeg_inputs=""
     local filter_complex=""
+    local audio_map_idx=1
+    local overlay_map_idx=2
 
     if [ -n "$bg_image" ] && [ -f "$bg_image" ]; then
         echo "🖼️  Using background image: $bg_image (mode: $bg_image_mode)"
@@ -511,39 +585,103 @@ create_modern_video() {
     fi
 
     local abs_srt_file=$(readlink -f "$srt_file" 2>/dev/null || echo "$srt_file")
-    local subtitle_style="FontName=${font},FontSize=${fontsize},PrimaryColour=${primary_color},SecondaryColour=${highlight_color},OutlineColour=&H000000&,BackColour=&H80000000&,Bold=1,Italic=0,BorderStyle=4,Outline=3,Shadow=2,MarginV=${margin_v},MarginL=60,MarginR=60,Alignment=2"
+    local subtitle_style="FontName=${font},FontSize=${fontsize},PrimaryColour=${primary_color},SecondaryColour=${highlight_color},OutlineColour=&H000000&,BackColour=&H80000000&,Bold=1,BorderStyle=4,Outline=3,Shadow=2,MarginV=${margin_v},MarginL=60,MarginR=60,Alignment=2"
     filter_complex="${filter_complex}[base]subtitles='${abs_srt_file}':force_style='${subtitle_style}'[subbed];"
     local current_video_stream="[subbed]"
 
     if [ -n "$image_file" ] && [ -f "$image_file" ]; then
         echo "🖼️  Adding image overlay: $image_file"
         ffmpeg_inputs="$ffmpeg_inputs -i \"$image_file\""
-        local overlay_filter=$(create_image_filter "$image_file" "$image_position" "$image_scale")
-        filter_complex="${filter_complex}[2:v]${overlay_filter/\[base\]/$current_video_stream}[v];"
+        local overlay_filter=$(create_overlay_filter_string "$image_position" "$image_scale" "1.0")
+        filter_complex="${filter_complex}[${overlay_map_idx}:v]${overlay_filter/\[base\]/$current_video_stream}[v];"
         current_video_stream="[v]"
     fi
-    filter_complex="${filter_complex%*;}"
     
-    local ffmpeg_cmd="ffmpeg -y $ffmpeg_inputs -filter_complex \"$filter_complex\" -map \"${current_video_stream}\" -map 1:a -c:v libx264 -preset $preset -crf $crf -c:a aac -b:a 192k -shortest \"$output_file\""
+    filter_complex="${filter_complex%;}"
+    
+    local ffmpeg_cmd="ffmpeg -y $ffmpeg_inputs -filter_complex \"$filter_complex\" -map \"${current_video_stream}\" -map ${audio_map_idx}:a -c:v libx264 -preset $preset -crf $crf -c:a aac -b:a 192k -shortest \"$output_file\""
 
     eval $ffmpeg_cmd
     
-    if [ $? -eq 0 ]; then
-        echo "✅ Modern video created: $output_file"
-        return 0
-    else
-        echo "❌ Video creation failed" >&2
-        return 1
-    fi
+    if [ $? -eq 0 ]; then echo "✅ Modern video created: $output_file"; return 0; else echo "❌ Video creation failed"; return 1; fi
 }
 
-
 # ==================== PIPELINE FUNCTIONS ====================
-# (Pipelines remain the same, they just call the updated functions)
 
-# Export functions
+# Full basic pipeline: transcribe + create basic video
+pipeline_basic() {
+    local audio_file="$1"
+    local model="${2:-$DEFAULT_MODEL}"
+    local output_dir="${3:-$OUTPUT_DIR}"
+    
+    mkdir -p "$output_dir"
+    local basename=$(get_basename "$audio_file")
+    local srt_file="$output_dir/${basename}.srt"
+    local output_video="$output_dir/${basename}-video.mp4"
+    
+    echo "====== STEP 1: TRANSCRIPTION ======"
+    srt_file=$(transcribe_to_srt "$audio_file" "$model" "$output_dir") || return 1
+    
+    echo -e "\n====== STEP 2: VIDEO CREATION ======"
+    create_basic_video "$audio_file" "$srt_file" "$output_video" || return 1
+    
+    echo -e "\n=========================================\n🎉 Basic pipeline complete! Video: $output_video\n========================================="
+}
+
+# Full karaoke pipeline: transcribe + generate ASS + create video
+pipeline_karaoke() {
+    local audio_file="$1"
+    local format="${2:-landscape}"
+    local model="${3:-$DEFAULT_MODEL}"
+    local output_dir="${4:-$OUTPUT_DIR}"
+    
+    mkdir -p "$output_dir"
+    local basename=$(get_basename "$audio_file")
+    local json_file="$output_dir/${basename}.json"
+    local ass_file="$output_dir/${basename}-karaoke.ass"
+    local output_video="$output_dir/${basename}-${format}-karaoke.mp4"
+    
+    echo "====== STEP 1: TRANSCRIPTION ======"
+    json_file=$(transcribe_to_json "$audio_file" "$model" "$output_dir") || return 1
+    
+    local settings=$(get_format_settings "$format")
+    if [ "$settings" == "ERROR" ]; then return 1; fi
+    IFS=':' read -r width height _ _ _ <<< "$settings"
+    
+    echo -e "\n====== STEP 2: ASS GENERATION ======"
+    ass_file=$(generate_karaoke_ass "$json_file" "$width" "$height" "$ass_file") || return 1
+    
+    echo -e "\n====== STEP 3: VIDEO CREATION ======"
+    create_karaoke_video "$audio_file" "$ass_file" "$output_video" "black" "$width" "$height" || return 1
+    
+    echo -e "\n=========================================\n🎉 Karaoke pipeline complete! Video: $output_video\n========================================="
+}
+
+# Full modern video pipeline: transcribe + create styled video
+pipeline_modern() {
+    local audio_file="$1"
+    local format="${2:-youtube}"
+    local model="${3:-$DEFAULT_MODEL}"
+    local output_dir="${4:-$OUTPUT_DIR}"
+    local bg_color="${5:-#1a1a2e}"
+    
+    mkdir -p "$output_dir"
+    local basename=$(get_basename "$audio_file")
+    local srt_file="$output_dir/${basename}.srt"
+    local output_video="$output_dir/${basename}-${format}-modern.mp4"
+    
+    echo "====== STEP 1: TRANSCRIPTION ======"
+    srt_file=$(transcribe_to_srt "$audio_file" "$model" "$output_dir") || return 1
+    
+    echo -e "\n====== STEP 2: VIDEO CREATION ======"
+    create_modern_video "$audio_file" "$srt_file" "$format" "$output_video" "$bg_color" || return 1
+    
+    echo -e "\n=========================================\n🎉 Modern video pipeline complete! Video: $output_video\n========================================="
+}
+
+# Export functions for use in other scripts
 export -f get_basename check_file get_audio_duration get_format_settings
-export -f create_background_filter create_image_filter create_image_slideshow
+export -f create_background_filter create_overlay_filter_string add_logo_to_video prepare_image create_image_zoom create_pip_video
 export -f transcribe_to_json transcribe_to_srt generate_karaoke_ass
 export -f create_basic_video create_karaoke_video create_modern_video
-export -f pipeline_karaoke pipeline_modern pipeline_basic
+export -f pipeline_basic pipeline_karaoke pipeline_modern
